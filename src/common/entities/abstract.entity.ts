@@ -3,6 +3,7 @@ import { Column, CreateDateColumn, Generated, PrimaryGeneratedColumn, UpdateDate
 
 export abstract class AbstractEntity {
   @PrimaryGeneratedColumn('increment')
+  @Exclude()
   id: number
 
   @Column()

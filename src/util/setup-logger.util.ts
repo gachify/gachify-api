@@ -20,7 +20,7 @@ export const setupLogger = (fastify: FastifyInstance): void => {
   })
 
   fastify.addHook('onResponse', (request, reply, done) => {
-    const userId = request.user.uuid || 'Guest'
+    const userId = request.user?.uuid || 'Guest'
 
     logger.log(
       `[${userId}] ${request.method} ${request.url} ${reply.statusCode} - ${request.ip} ${now() - reply.startTime}ms`,

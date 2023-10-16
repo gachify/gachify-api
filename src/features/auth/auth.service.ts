@@ -17,7 +17,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async login({ username, password }: LoginUserDto): Promise<LoginPayloadDto | null> {
+  async login({ username, password }: LoginUserDto): Promise<LoginPayloadDto> {
     try {
       const user = await this.userService.findOneByUsername(username)
 

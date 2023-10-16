@@ -15,6 +15,10 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
     const queryRunner = this.usersRepository.queryRunner
 
+    if (!queryRunner) {
+      throw new InternalServerErrorException()
+    }
+
     await queryRunner.connect()
     await queryRunner.startTransaction()
 

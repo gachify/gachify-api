@@ -5,10 +5,14 @@ import { NODE_ENV } from '@common/models'
 import { environment } from '@environment'
 import { AuthModule } from '@features/auth'
 import { UserModule } from '@features/user'
+import { PlaylistModule } from '@features/playlist'
+import { SongModule } from '@features/song'
+import { ArtistModule } from '@features/artist'
 
 @Module({
   imports: [
     AuthModule,
+    ArtistModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: environment.POSTGRES_HOST,
@@ -21,6 +25,8 @@ import { UserModule } from '@features/user'
       logging: environment.NODE_ENV === NODE_ENV.DEVELOPMENT,
     }),
     UserModule,
+    PlaylistModule,
+    SongModule,
   ],
   controllers: [],
   providers: [],

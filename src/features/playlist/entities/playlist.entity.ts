@@ -1,4 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm'
+import { Exclude } from 'class-transformer'
 
 import { AbstractEntity } from '@common/entities'
 import { UserEntity } from '@features/user/entities'
@@ -9,6 +10,7 @@ export class PlaylistEntity extends AbstractEntity {
   @Column()
   name: string
 
+  @Exclude()
   @ManyToOne(() => UserEntity, (user) => user.playlists)
   user: UserEntity
 

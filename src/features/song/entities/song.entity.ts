@@ -1,8 +1,7 @@
 import { Column, Entity, ManyToOne } from 'typeorm'
 
-import { ArtistEntity } from './artist.entity'
-
 import { AbstractEntity } from '@common/entities'
+import { ArtistEntity } from '@features/artist/entities'
 
 @Entity({ name: 'songs' })
 export class SongEntity extends AbstractEntity {
@@ -12,10 +11,10 @@ export class SongEntity extends AbstractEntity {
   @Column('int')
   duration: number
 
-  @Column('int')
+  @Column('int', { default: 0 })
   playbackCount: number
 
-  @Column('int')
+  @Column('int', { default: 0 })
   likingCount: number
 
   @ManyToOne(() => ArtistEntity, (artist) => artist.songs)

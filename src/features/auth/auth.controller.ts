@@ -8,7 +8,7 @@ import { Public } from './decorators'
 import { UserDto } from '@features/user/dto'
 
 @Controller('auth')
-@ApiTags('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
