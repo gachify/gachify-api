@@ -4,7 +4,7 @@ import fastify from 'fastify'
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common'
 
 import { AppModule } from './app.module'
-import { setupLogger, setupSwagger } from './util'
+import { setupLogger } from './util/setup-logger.util'
 
 import { environment } from '@environment'
 import { NODE_ENV } from '@common/models'
@@ -23,7 +23,7 @@ import { NODE_ENV } from '@common/models'
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(fastifyInstance))
 
   if (environment.NODE_ENV === NODE_ENV.DEVELOPMENT) {
-    setupSwagger(app)
+    import('./util/setup-swagger.util').then(({ setupSwagger }) => setupSwagger(app))
   }
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }))

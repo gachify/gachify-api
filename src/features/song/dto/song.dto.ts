@@ -13,9 +13,6 @@ export class SongDto extends AbstractDto {
   @ApiProperty({ type: () => Number })
   readonly playbackCount: number
 
-  @ApiProperty({ type: () => Number })
-  readonly likingCount: number
-
   @ApiProperty({ type: () => ArtistDto })
   readonly artist: ArtistDto
 }

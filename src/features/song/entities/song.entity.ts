@@ -11,11 +11,8 @@ export class SongEntity extends AbstractEntity {
   @Column('int')
   duration: number
 
-  @Column('int', { default: 0 })
+  @Column({ name: 'playback_count', type: 'int', default: 0 })
   playbackCount: number
-
-  @Column('int', { default: 0 })
-  likingCount: number
 
   @ManyToOne(() => ArtistEntity, (artist) => artist.songs)
   artist: ArtistEntity

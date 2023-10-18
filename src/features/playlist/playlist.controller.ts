@@ -4,7 +4,7 @@ import { ApiTags, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger'
 import { CreatePlaylistDto, PlaylistDto } from './dto'
 import { PlaylistService } from './playlist.service'
 
-import { CurrentUser, Public } from '@features/auth/decorators'
+import { CurrentUser } from '@features/auth/decorators'
 import { UserEntity } from '@features/user/entities'
 
 @Controller('playlists')
@@ -31,7 +31,6 @@ export class PlaylistController {
   }
 
   @Post()
-  @Public()
   @ApiCreatedResponse({
     status: HttpStatus.OK,
     type: PlaylistDto,
