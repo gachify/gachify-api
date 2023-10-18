@@ -1,5 +1,5 @@
 # Build
-FROM node:18-alpine As build
+FROM node:20-alpine As build
 
 WORKDIR /usr/src/app
 
@@ -22,7 +22,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 USER node
 
 # Production
-FROM node:18-alpine As production
+FROM node:20-alpine As production
 
 # Install ffmpeg and yt-dlp
 RUN apk update && apk add ffmpeg yt-dlp curl
