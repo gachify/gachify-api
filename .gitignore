@@ -14,7 +14,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .idea
 
 # Runtime data
-data
 pids
 *.pid
 *.seed
@@ -138,3 +137,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Docker volumes
+data
+media

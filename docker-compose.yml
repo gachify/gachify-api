@@ -19,9 +19,12 @@ services:
       - JWT_TOKEN_EXPIRATION_TIME
       - USER_PASSWORD_BCRYPT_SALT_ROUNDS
     ports:
-      - ${PORT}:${PORT}
+      - 127.0.0.1:${PORT}:${PORT}
     networks:
       - db-network
+      - local-network
+    volumes:
+      - media-volume:/app/media
     depends_on:
       - database
 
@@ -47,7 +50,15 @@ volumes:
       type: none
       o: bind
       device: ./data
+  media-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./media
 
 networks:
   db-network:
     driver: bridge
+    internal: true
+  local-network:

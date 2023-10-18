@@ -35,6 +35,6 @@ import { NODE_ENV } from '@common/models'
     credentials: true,
   })
 
-  await app.listen(environment.PORT)
-  logger.log(`Server started on port ${environment.PORT}`)
+  await app.listen(environment.PORT, '0.0.0.0')
+  logger.log(`Server started on ${environment.PORT}`)
 })()

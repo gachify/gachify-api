@@ -25,7 +25,7 @@ USER node
 FROM node:18-alpine As production
 
 # Install ffmpeg and yt-dlp
-RUN apk update && apk add ffmpeg yt-dlp
+RUN apk update && apk add ffmpeg yt-dlp curl
 
 WORKDIR /app
 
