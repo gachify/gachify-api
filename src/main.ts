@@ -1,6 +1,7 @@
 import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import fastify from 'fastify'
+import fastifyCookie from '@fastify/cookie'
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common'
 
 import { AppModule } from './app.module'
@@ -34,6 +35,8 @@ import { NODE_ENV } from '@common/models'
     origin: environment.UI_URL,
     credentials: true,
   })
+
+  await app.register(fastifyCookie, { secret: environment.COOKIE_SECRET })
 
   await app.listen(environment.PORT, '0.0.0.0')
   logger.log(`Server started on ${environment.PORT}`)

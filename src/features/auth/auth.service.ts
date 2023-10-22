@@ -1,13 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { compare, hash } from 'bcrypt'
+import { FastifyReply } from 'fastify'
 import { JwtPayload } from 'jsonwebtoken'
 
-import { LoginPayloadDto, LoginUserDto, RegisterUserDto } from './dto'
+import { LoginUserDto, RegisterUserDto } from './dto'
+import { SESSION_COOKIE } from './session-cookie.constant'
 
 import { environment } from '@environment'
 import { UserService } from '@features/user/user.service'
-import { CreateUserDto } from '@features/user/dto'
+import { CreateUserDto, UserDto } from '@features/user/dto'
 import { UserEntity } from '@features/user/entities'
 
 @Injectable()
@@ -17,7 +19,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async login({ username, password }: LoginUserDto): Promise<LoginPayloadDto> {
+  async login({ username, password }: LoginUserDto, res: FastifyReply): Promise<UserDto> {
     try {
       const user = await this.userService.findOneByUsername(username)
 
@@ -31,25 +33,30 @@ export class AuthService {
       }
 
       const accessToken = await this.getJwtAccessToken(user)
+      this.setSessionCookie(res, accessToken)
 
-      return {
-        user,
-        token: {
-          accessToken,
-        },
-      }
+      return { uuid: user.uuid, username: user.username, email: user.email }
     } catch (error) {
       throw new UnauthorizedException()
     }
   }
 
-  async register(input: RegisterUserDto): Promise<UserEntity> {
-    const passwordHash = await this.getPasswordHash(input.password)
-    const createUserDto: CreateUserDto = { hash: passwordHash, username: input.username }
+  async register(input: RegisterUserDto, res: FastifyReply): Promise<UserDto> {
+    try {
+      const passwordHash = await this.getPasswordHash(input.password)
+      const createUserDto: CreateUserDto = { hash: passwordHash, email: input.email, username: input.username }
 
-    // @todo validate invitationCode
+      // @todo validate invitationCode
 
-    return this.userService.createUser(createUserDto)
+      const user = await this.userService.createUser(createUserDto)
+
+      const accessToken = await this.getJwtAccessToken(user)
+      this.setSessionCookie(res, accessToken)
+
+      return { uuid: user.uuid, username: user.username, email: user.email }
+    } catch (error) {
+      throw new UnauthorizedException()
+    }
   }
 
   async getUserFromToken(token: string): Promise<UserEntity | null> {
@@ -64,6 +71,17 @@ export class AuthService {
     }
 
     return this.jwtService.signAsync(payload)
+  }
+
+  private setSessionCookie(res: FastifyReply, accessToken: string) {
+    res.setCookie(SESSION_COOKIE, accessToken, {
+      path: '/',
+      secure: true,
+      httpOnly: true,
+      sameSite: 'strict',
+      signed: true,
+      maxAge: environment.JWT_TOKEN_EXPIRATION_TIME,
+    })
   }
 
   private async getPasswordHash(password: string): Promise<string> {

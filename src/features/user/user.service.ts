@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
@@ -13,29 +13,18 @@ export class UserService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const queryRunner = this.usersRepository.queryRunner
+    const user = this.usersRepository.create(createUserDto)
 
-    if (!queryRunner) {
-      throw new InternalServerErrorException()
+    const [emailTaken, usernameTaken] = await Promise.all([
+      this.usersRepository.exist({ where: { email: createUserDto.email } }),
+      this.usersRepository.exist({ where: { username: createUserDto.username } }),
+    ])
+
+    if (emailTaken || usernameTaken) {
+      throw new BadRequestException({ emailTaken, usernameTaken })
     }
 
-    await queryRunner.connect()
-    await queryRunner.startTransaction()
-
-    try {
-      const user = this.usersRepository.create(createUserDto)
-      await queryRunner.manager.save(user)
-
-      await queryRunner.commitTransaction()
-
-      return user
-    } catch (error) {
-      await queryRunner.rollbackTransaction()
-
-      throw new InternalServerErrorException()
-    } finally {
-      await queryRunner.release()
-    }
+    return this.usersRepository.save(user)
   }
 
   findOneByUsername(username: string): Promise<UserEntity | null> {

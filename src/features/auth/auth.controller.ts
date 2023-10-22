@@ -1,11 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { FastifyReply } from 'fastify'
 
-import { LoginPayloadDto, LoginUserDto, RegisterUserDto } from './dto'
+import { LoginUserDto, RegisterUserDto } from './dto'
 import { AuthService } from './auth.service'
-import { Public } from './decorators'
+import { CurrentUser, Public } from './decorators'
+import { SESSION_COOKIE } from './session-cookie.constant'
 
 import { UserDto } from '@features/user/dto'
+import { UserEntity } from '@features/user/entities'
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -18,8 +21,9 @@ export class AuthController {
     status: HttpStatus.OK,
     type: UserDto,
   })
-  async register(@Body() input: RegisterUserDto): Promise<UserDto> {
-    return this.authService.register(input)
+  async register(@Res() res: FastifyReply, @Body() input: RegisterUserDto): Promise<void> {
+    const user = await this.authService.register(input, res)
+    res.send(user)
   }
 
   @Post('/login')
@@ -27,16 +31,27 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     status: HttpStatus.OK,
-    type: LoginPayloadDto,
+    type: UserDto,
   })
-  async login(@Body() input: LoginUserDto): Promise<LoginPayloadDto> {
-    return this.authService.login(input)
+  async login(@Res() res: FastifyReply, @Body() input: LoginUserDto): Promise<void> {
+    const user = await this.authService.login(input, res)
+    res.send(user)
+  }
+
+  @Get('/whoami')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: UserDto,
+  })
+  whoami(@CurrentUser() user: UserEntity): UserDto {
+    return { uuid: user.uuid, username: user.username, email: user.email }
   }
 
   @Get('/logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout' })
-  async logout() {
-    // return await this.authService.removeRefreshToken();
+  logout(@Res() res: FastifyReply) {
+    res.clearCookie(SESSION_COOKIE)
   }
 }

@@ -15,6 +15,7 @@ interface Environment {
   POSTGRES_PASSWORD: string
   POSTGRES_DB: string
   // Security
+  COOKIE_SECRET: string
   JWT_TOKEN_SECRET: string
   JWT_TOKEN_EXPIRATION_TIME: number
   USER_PASSWORD_BCRYPT_SALT_ROUNDS: number
@@ -29,6 +30,7 @@ export const environment: Environment = {
   POSTGRES_USER: String(process.env.POSTGRES_USER),
   POSTGRES_PASSWORD: String(process.env.POSTGRES_PASSWORD),
   POSTGRES_DB: String(process.env.POSTGRES_DB),
+  COOKIE_SECRET: String(process.env.COOKIE_SECRET),
   JWT_TOKEN_SECRET: String(process.env.JWT_TOKEN_SECRET),
   JWT_TOKEN_EXPIRATION_TIME: Number(process.env.JWT_TOKEN_EXPIRATION_TIME),
   USER_PASSWORD_BCRYPT_SALT_ROUNDS: Number(process.env.USER_PASSWORD_BCRYPT_SALT_ROUNDS),

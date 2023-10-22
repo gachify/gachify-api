@@ -7,5 +7,5 @@ export class UserDto extends AbstractDto {
   readonly username: string
 
   @ApiProperty()
-  readonly avatar: string
+  readonly email: string
 }

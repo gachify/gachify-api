@@ -9,8 +9,8 @@ export class UserEntity extends AbstractEntity {
   @Column({ unique: true })
   username: string
 
-  @Column({ nullable: true })
-  avatar: string
+  @Column({ unique: true })
+  email: string
 
   @Column()
   @Exclude()

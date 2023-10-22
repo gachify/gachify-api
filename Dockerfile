@@ -1,10 +1,13 @@
 # Build
-FROM node:18-alpine As build
+FROM node:20-alpine As build
 
 WORKDIR /usr/src/app
 
 # Copy source code into app folder
 COPY --chown=node:node . .
+
+# Install python
+RUN apk add curl python3 --no-cache --virtual build-dependencies build-base gcc 
 
 # Install dependencies
 RUN npm ci
@@ -22,10 +25,13 @@ RUN npm ci --omit=dev && npm cache clean --force
 USER node
 
 # Production
-FROM node:18-alpine As production
+FROM node:20-alpine As production
 
 # Install ffmpeg and yt-dlp
-RUN apk update && apk add ffmpeg yt-dlp curl
+RUN apk update && apk add ffmpeg yt-dlp
+
+# Install python
+RUN apk add curl python3 --no-cache --virtual build-dependencies build-base gcc 
 
 WORKDIR /app
 
