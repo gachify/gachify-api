@@ -9,8 +9,11 @@ import {
   Query,
   StreamableFile,
   ValidationPipe,
+  Headers,
+  Res,
 } from '@nestjs/common'
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger'
+import { FastifyReply } from 'fastify'
 
 import { SongService } from './song.service'
 import { CreateSongDto, SongDto, SongsPageDto, SongsPageOptionsDto } from './dto'
@@ -36,12 +39,29 @@ export class SongController {
   }
 
   @Get('/:songId/stream')
+  @Header('Accept-Ranges', 'bytes')
   @Header('Content-Type', 'audio/mpeg')
   @ApiOkResponse({
     status: HttpStatus.OK,
   })
-  stream(@Param('songId') songId: string, @CurrentUser() currentUser: UserEntity): Promise<StreamableFile> {
-    return this.songService.streamSong(currentUser, songId)
+  stream(
+    @Param('songId') songId: string,
+    @Headers('range') range: string,
+    @CurrentUser() currentUser: UserEntity,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ): StreamableFile {
+    this.songService.updatePlaybackCount(currentUser, songId)
+
+    if (!range) {
+      return this.songService.getAudioStreamById(songId)
+    }
+
+    const { streamableFile, contentRange } = this.songService.getPartialAudioStreamById(songId, range)
+
+    response.status(206)
+    response.setHeader('Content-Range', contentRange)
+
+    return streamableFile
   }
 
   @Get('/:songId')

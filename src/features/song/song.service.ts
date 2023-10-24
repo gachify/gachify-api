@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
-import { createReadStream } from 'fs'
+import { createReadStream, statSync } from 'fs'
 import { join } from 'path'
 
 import { SongEntity } from './entities'
@@ -32,22 +32,17 @@ export class SongService {
     private readonly analyticsService: AnalyticsService,
   ) {}
 
-  async streamSong(currentUser: UserEntity, songId: string): Promise<StreamableFile> {
+  async updatePlaybackCount(currentUser: UserEntity, songId: string): Promise<void> {
     const song = await this.songRepository.findOneBy({ uuid: songId })
 
-    if (!song) {
-      throw new NotFoundException()
+    if (song) {
+      song.playbackCount = song.playbackCount + 1
+
+      await Promise.all([
+        this.songRepository.save(song),
+        this.analyticsService.updateUserAnalytics(currentUser.uuid, song),
+      ])
     }
-
-    song.playbackCount = song.playbackCount + 1
-
-    await Promise.all([
-      this.songRepository.save(song),
-      this.analyticsService.updateUserAnalytics(currentUser.uuid, song),
-    ])
-
-    const file = createReadStream(join(MEDIA_PATH, `${songId}.mp3`))
-    return new StreamableFile(file)
   }
 
   async createSong(createSongDto: CreateSongDto): Promise<SongEntity> {
@@ -126,5 +121,44 @@ export class SongService {
     })
 
     return new SongsPageDto(songs, pageMetaDto)
+  }
+
+  getAudioStreamById(songId: string): StreamableFile {
+    const file = createReadStream(this.getSongPath(songId))
+    return new StreamableFile(file)
+  }
+
+  getPartialAudioStreamById(songId: string, range: string) {
+    const songPath = this.getSongPath(songId)
+    const { size } = statSync(songPath)
+
+    const { start, end } = this.parseRange(range, size)
+
+    const stream = createReadStream(songPath, { start, end })
+
+    const streamableFile = new StreamableFile(stream)
+
+    const contentRange = this.getContentRange(start, end, size)
+
+    return {
+      streamableFile,
+      contentRange,
+    }
+  }
+
+  private parseRange(range: string, size: number) {
+    const parts = range.replace(/bytes=/, '').split('-')
+    const start = parseInt(parts[0], 10)
+    const end = parts[1] ? parseInt(parts[1], 10) : size - 1
+
+    return { start, end }
+  }
+
+  private getContentRange(rangeStart: number, rangeEnd: number, fileSize: number) {
+    return `bytes ${rangeStart}-${rangeEnd}/${fileSize}`
+  }
+
+  private getSongPath(songId: string): string {
+    return join(MEDIA_PATH, `${songId}.mp3`)
   }
 }
