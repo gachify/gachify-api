@@ -1,7 +1,10 @@
 .vscode
 Dockerfile
 .dockerignore
+docker-compose.yml
+docker-compose.local.yml
 node_modules
 npm-debug.log
 dist
 .env
+ssl

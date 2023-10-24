@@ -2,17 +2,34 @@ import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import fastify from 'fastify'
 import fastifyCookie from '@fastify/cookie'
+import fastifyStatic from '@fastify/static'
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common'
+import { readFileSync } from 'fs'
+import * as https from 'https'
 
 import { AppModule } from './app.module'
 import { setupLogger } from './util/setup-logger.util'
+import { MEDIA_PATH, SSL_CERT_PATH, SSL_KEY_PATH } from './app.constants'
 
 import { environment } from '@environment'
 import { NODE_ENV } from '@common/models'
 ;(async () => {
   const logger = new Logger()
 
+  let httpsOptions: https.ServerOptions | null = null
+
+  if (environment.NODE_ENV !== NODE_ENV.DEVELOPMENT) {
+    const keyFile = readFileSync(SSL_KEY_PATH)
+    const certFile = readFileSync(SSL_CERT_PATH)
+
+    httpsOptions = {
+      key: keyFile,
+      cert: certFile,
+    }
+  }
+
   const fastifyInstance = fastify({
+    https: httpsOptions,
     logger: {
       level: 'warn',
     },
@@ -38,6 +55,9 @@ import { NODE_ENV } from '@common/models'
 
   await app.register(fastifyCookie, { secret: environment.COOKIE_SECRET })
 
+  await app.register(fastifyStatic, { root: MEDIA_PATH, prefix: '/media/' })
+
   await app.listen(environment.PORT, '0.0.0.0')
+
   logger.log(`Server started on ${environment.PORT}`)
 })()

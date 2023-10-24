@@ -25,7 +25,7 @@ export class AnalyticsService {
     let analytics = await this.analyticsRepository.findOneBy({ user: { uuid: user.uuid } })
 
     if (!analytics) {
-      analytics = this.analyticsRepository.create()
+      analytics = this.analyticsRepository.create({ user, totalDuration: 0, songCount: 0 })
     }
 
     analytics.totalDuration = analytics.totalDuration + song.duration

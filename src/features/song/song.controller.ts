@@ -1,8 +1,19 @@
-import { Body, Controller, Get, Header, HttpStatus, Param, Post, StreamableFile } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  StreamableFile,
+  ValidationPipe,
+} from '@nestjs/common'
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger'
 
 import { SongService } from './song.service'
-import { CreateSongDto, SongDto } from './dto'
+import { CreateSongDto, SongDto, SongsPageDto, SongsPageOptionsDto } from './dto'
 
 import { CurrentUser } from '@features/auth/decorators'
 import { UserEntity } from '@features/user/entities'
@@ -11,6 +22,18 @@ import { UserEntity } from '@features/user/entities'
 @ApiTags('Songs')
 export class SongController {
   constructor(private readonly songService: SongService) {}
+
+  @Get('')
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: SongsPageDto,
+  })
+  songs(
+    @Query(new ValidationPipe({ transform: true }))
+    pageOptionsDto: SongsPageOptionsDto,
+  ): Promise<SongsPageDto> {
+    return this.songService.getSongs(pageOptionsDto)
+  }
 
   @Get('/:songId/stream')
   @Header('Content-Type', 'audio/mpeg')
@@ -26,8 +49,17 @@ export class SongController {
     status: HttpStatus.OK,
     type: SongDto,
   })
-  getPlaylistById(@Param('songId') songId: string): Promise<SongDto> {
+  getSongById(@Param('songId') songId: string): Promise<SongDto> {
     return this.songService.searchSong(songId)
+  }
+
+  @Get('/popular')
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: [SongDto],
+  })
+  getPopularSongs(): Promise<SongDto[]> {
+    return this.songService.popularSongs()
   }
 
   @Post()

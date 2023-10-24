@@ -11,12 +11,14 @@ import { createReadStream } from 'fs'
 import { join } from 'path'
 
 import { SongEntity } from './entities'
-import { CreateSongDto } from './dto'
+import { CreateSongDto, SongsPageDto, SongsPageOptionsDto } from './dto'
 import { YoutubeService } from './youtube.service'
+import { MEDIA_PATH } from '../../app.constants'
 
 import { ArtistEntity } from '@features/artist/entities'
 import { AnalyticsService } from '@features/analytics'
 import { UserEntity } from '@features/user/entities'
+import { PageMetaDto } from '@common/dto'
 
 @Injectable()
 export class SongService {
@@ -44,7 +46,7 @@ export class SongService {
       this.analyticsService.updateUserAnalytics(currentUser.uuid, song),
     ])
 
-    const file = createReadStream(join(process.cwd(), `${songId}.mp3`))
+    const file = createReadStream(join(MEDIA_PATH, `${songId}.mp3`))
     return new StreamableFile(file)
   }
 
@@ -101,5 +103,28 @@ export class SongService {
     }
 
     return song
+  }
+
+  popularSongs(): Promise<SongEntity[]> {
+    return this.songRepository.find({
+      relations: ['artist'],
+      take: 12,
+      order: { playbackCount: 'DESC', createdAt: 'DESC' },
+    })
+  }
+
+  async getSongs(pageOptionsDto: SongsPageOptionsDto): Promise<SongsPageDto> {
+    const [songs, songsCount] = await this.songRepository.findAndCount({
+      relations: ['artist'],
+      skip: pageOptionsDto.skip,
+      take: pageOptionsDto.take,
+    })
+
+    const pageMetaDto = new PageMetaDto({
+      pageOptionsDto,
+      itemCount: songsCount,
+    })
+
+    return new SongsPageDto(songs, pageMetaDto)
   }
 }

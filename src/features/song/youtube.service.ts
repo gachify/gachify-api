@@ -23,7 +23,12 @@ export class YoutubeService {
       `-o ${songId}`,
     ].join(' ')
 
-    await command('yt-dlp ' + args)
+    try {
+      await command('yt-dlp ' + args)
+    } catch (error) {
+      this.logger.debug(error)
+      throw error
+    }
 
     this.logger.debug(`Completed download of ${youtubeUrl}`)
   }
