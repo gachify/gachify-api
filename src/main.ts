@@ -1,15 +1,14 @@
 import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
-import fastify from 'fastify'
-import fastifyCookie from '@fastify/cookie'
-import fastifyStatic from '@fastify/static'
+import { fastify } from 'fastify'
+import { fastifyCookie } from '@fastify/cookie'
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common'
 import { readFileSync } from 'fs'
 import * as https from 'https'
 
 import { AppModule } from './app.module'
 import { setupLogger } from './util/setup-logger.util'
-import { MEDIA_PATH, SSL_CERT_PATH, SSL_KEY_PATH } from './app.constants'
+import { SSL_CERT_PATH, SSL_KEY_PATH } from './app.constants'
 
 import { environment } from '@environment'
 import { NODE_ENV } from '@common/models'
@@ -54,8 +53,6 @@ import { NODE_ENV } from '@common/models'
   })
 
   await app.register(fastifyCookie, { secret: environment.COOKIE_SECRET })
-
-  await app.register(fastifyStatic, { root: MEDIA_PATH, prefix: '/media/' })
 
   await app.listen(environment.PORT, '0.0.0.0')
 

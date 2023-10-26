@@ -10,6 +10,7 @@ import { SongModule } from '@features/song'
 import { ArtistModule } from '@features/artist'
 import { AnalyticsModule } from '@features/analytics'
 import { SnakeNamingStrategy } from '@common/strategies'
+import { MediaModule } from '@features/media'
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { SnakeNamingStrategy } from '@common/strategies'
     UserModule,
     PlaylistModule,
     SongModule,
+    MediaModule,
   ],
   controllers: [],
   providers: [],
