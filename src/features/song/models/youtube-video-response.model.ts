@@ -14,6 +14,7 @@ export interface YoutubeVideoResponseModel {
   uploader: string
   uploader_id: string
   uploader_url: string
+  tags?: string[]
   upload_date: string // 20200518
   fulltitle: string
 }

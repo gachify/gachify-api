@@ -46,7 +46,8 @@ export class SongService {
   }
 
   async createSong(createSongDto: CreateSongDto): Promise<SongEntity> {
-    const video = await this.youtubeService.getInfo(createSongDto.youtubeUrl)
+    const videoCode = this.youtubeService.getVideoCode(createSongDto.youtubeUrl)
+    const video = await this.youtubeService.getInfo(videoCode)
 
     const songExists = await this.songRepository.findOneBy({ name: video.title })
 
@@ -76,7 +77,7 @@ export class SongService {
 
       await queryRunner.manager.save(song)
 
-      await this.youtubeService.download(createSongDto.youtubeUrl, song.uuid)
+      await this.youtubeService.download(videoCode, song.uuid)
 
       await queryRunner.commitTransaction()
 
