@@ -1,13 +1,23 @@
-import { Column, Entity, OneToMany } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm'
 
-import { AbstractEntity } from '@common/entities'
+import { ArtistTable } from '@common/tables'
+import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
 import { SongEntity } from '@features/song/entities'
 
-@Entity({ name: 'artists' })
-export class ArtistEntity extends AbstractEntity {
-  @Column()
+@Entity({ name: ArtistTable.name })
+export class ArtistEntity {
+  @PrimaryColumn(toPrimaryColumnOptions(ArtistTable.idColumn))
+  id: string
+
+  @Column(toColumnOptions(ArtistTable.nameColumn))
   name: string
 
-  @OneToMany(() => SongEntity, (song) => song.artist)
+  @Column(toColumnOptions(ArtistTable.imageUrlColumn))
+  imageUrl?: string
+
+  @Column(toColumnOptions(ArtistTable.youtubeUrlColumn))
+  youtubeUrl?: string
+
+  @OneToMany(() => SongEntity, (songs) => songs.artist)
   songs: SongEntity[]
 }

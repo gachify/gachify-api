@@ -5,7 +5,7 @@ import { CreatePlaylistDto, PlaylistDto } from './dto'
 import { PlaylistService } from './playlist.service'
 
 import { CurrentUser } from '@features/auth/decorators'
-import { UserEntity } from '@features/user/entities'
+import { UserAccountEntity } from '@features/user/entities'
 
 @Controller('playlists')
 @ApiTags('Playlists')
@@ -17,7 +17,7 @@ export class PlaylistController {
     status: HttpStatus.OK,
     type: [PlaylistDto],
   })
-  async userPlaylists(@CurrentUser() user: UserEntity): Promise<PlaylistDto[]> {
+  async userPlaylists(@CurrentUser() user: UserAccountEntity): Promise<PlaylistDto[]> {
     return this.playlistService.getPlaylists(user)
   }
 

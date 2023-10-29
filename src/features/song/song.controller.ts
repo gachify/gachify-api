@@ -19,7 +19,7 @@ import { SongService } from './song.service'
 import { CreateSongDto, SongDto, SongsPageDto, SongsPageOptionsDto } from './dto'
 
 import { CurrentUser } from '@features/auth/decorators'
-import { UserEntity } from '@features/user/entities'
+import { UserAccountEntity } from '@features/user/entities'
 
 @Controller('songs')
 @ApiTags('Songs')
@@ -47,10 +47,10 @@ export class SongController {
   stream(
     @Param('songId') songId: string,
     @Headers('range') range: string,
-    @CurrentUser() currentUser: UserEntity,
+    @CurrentUser() currentUser: UserAccountEntity,
     @Res({ passthrough: true }) response: FastifyReply,
   ): StreamableFile {
-    this.songService.updatePlaybackCount(currentUser, songId)
+    // this.songService.updatePlaybackCount(currentUser, songId)
 
     if (!range) {
       return this.songService.getAudioStreamById(songId)

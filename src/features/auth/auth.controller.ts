@@ -7,8 +7,9 @@ import { AuthService } from './auth.service'
 import { CurrentUser, Public } from './decorators'
 import { SESSION_COOKIE } from './session-cookie.constant'
 
-import { UserDto } from '@features/user/dto'
-import { UserEntity } from '@features/user/entities'
+import { UserAccountEntity } from '@features/user/entities'
+import { environment } from '@environment'
+import { UserAccountDto } from '@features/user/dto'
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -19,11 +20,13 @@ export class AuthController {
   @Public()
   @ApiOkResponse({
     status: HttpStatus.OK,
-    type: UserDto,
+    type: UserAccountDto,
   })
-  async register(@Res() res: FastifyReply, @Body() input: RegisterUserDto): Promise<void> {
-    const user = await this.authService.register(input, res)
-    res.send(user)
+  async register(@Res() res: FastifyReply, @Body() input: RegisterUserDto): Promise<UserAccountDto> {
+    const userAccount = await this.authService.register(input)
+    this.setSessionCookie(res, userAccount)
+    return userAccount
+    // res.send(user)
   }
 
   @Post('/login')
@@ -31,21 +34,23 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     status: HttpStatus.OK,
-    type: UserDto,
+    type: UserAccountDto,
   })
-  async login(@Res() res: FastifyReply, @Body() input: LoginUserDto): Promise<void> {
-    const user = await this.authService.login(input, res)
-    res.send(user)
+  async login(@Res() res: FastifyReply, @Body() input: LoginUserDto): Promise<UserAccountDto> {
+    const userAccount = await this.authService.login(input)
+    this.setSessionCookie(res, userAccount)
+    return userAccount
+    // res.send(user)
   }
 
   @Get('/whoami')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     status: HttpStatus.OK,
-    type: UserDto,
+    type: UserAccountDto,
   })
-  whoami(@CurrentUser() user: UserEntity): UserDto {
-    return { uuid: user.uuid, username: user.username, email: user.email }
+  whoami(@CurrentUser() user: UserAccountEntity): UserAccountDto {
+    return { id: user.id, username: user.username }
   }
 
   @Get('/logout')
@@ -53,5 +58,18 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout' })
   logout(@Res() res: FastifyReply) {
     res.clearCookie(SESSION_COOKIE)
+  }
+
+  private setSessionCookie(res: FastifyReply, userAccount: UserAccountEntity): void {
+    const accessToken = this.authService.getJwtAccessToken(userAccount)
+
+    res.setCookie(SESSION_COOKIE, accessToken, {
+      path: '/',
+      secure: true,
+      httpOnly: true,
+      sameSite: 'strict',
+      signed: true,
+      maxAge: environment.JWT_TOKEN_EXPIRATION_TIME,
+    })
   }
 }

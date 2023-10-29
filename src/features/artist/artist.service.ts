@@ -18,8 +18,8 @@ export class ArtistService {
     return this.artistRepository.save(artist)
   }
 
-  async searchArtist(artistId: string): Promise<ArtistEntity> {
-    const artist = await this.artistRepository.findOne({ relations: ['songs'], where: { uuid: artistId } })
+  async findById(artistId: string): Promise<ArtistEntity> {
+    const artist = await this.artistRepository.findOne({ relations: ['songs'], where: { id: artistId } })
 
     if (!artist) {
       throw new NotFoundException()

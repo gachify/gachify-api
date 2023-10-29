@@ -1,19 +1,38 @@
-import { Column, Entity, ManyToOne } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm'
 
-import { AbstractEntity } from '@common/entities'
-import { ArtistEntity } from '@features/artist/entities'
+import { OriginalSongEntity } from './original-song.entity'
 
-@Entity({ name: 'songs' })
-export class SongEntity extends AbstractEntity {
-  @Column()
-  name: string
+import { ArtistEntity, OriginalArtistEntity } from '@features/artist/entities'
+import { SongTable } from '@common/tables'
+import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
+import { PlaylistEntity } from '@features/playlist/entities'
 
-  @Column('int')
+@Entity({ name: SongTable.table.name })
+export class SongEntity {
+  @PrimaryColumn(toPrimaryColumnOptions(SongTable.idColumn))
+  id: string
+
+  @Column(toColumnOptions(SongTable.durationColumn))
   duration: number
 
-  @Column({ name: 'playback_count', type: 'int', default: 0 })
-  playbackCount: number
+  @Column(toColumnOptions(SongTable.titleColumn))
+  title: string
+
+  @Column(toColumnOptions(SongTable.imageUrlColumn))
+  imageUrl: string
+
+  @ManyToOne(() => OriginalArtistEntity)
+  @JoinColumn(SongTable.originalArtistIdColumn)
+  originalArtist: OriginalArtistEntity
 
   @ManyToOne(() => ArtistEntity, (artist) => artist.songs)
+  @JoinColumn(SongTable.artistIdColumn)
   artist: ArtistEntity
+
+  @OneToOne(() => OriginalSongEntity)
+  @JoinColumn(SongTable.originalSongIdColumn)
+  originalSong: OriginalSongEntity
+
+  @ManyToMany(() => PlaylistEntity, (playlist) => playlist.songs)
+  playlists: PlaylistEntity[]
 }

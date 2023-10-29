@@ -1,18 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-import { AbstractDto } from '@common/dto'
-import { ArtistDto } from '@features/artist/dto'
+import { OriginalSongDto } from './original-song.dto'
 
-export class SongDto extends AbstractDto {
+import { ArtistDto, OriginalArtistDto } from '@features/artist/dto'
+
+export class SongDto {
   @ApiProperty()
-  readonly name: string
+  readonly id: string
 
   @ApiProperty({ type: () => Number })
   readonly duration: number
 
-  @ApiProperty({ type: () => Number })
-  readonly playbackCount: number
+  @ApiProperty()
+  readonly title: string
+
+  @ApiProperty()
+  readonly imageUrl: string
+
+  @ApiProperty({ type: () => OriginalArtistDto })
+  readonly originalArtist: OriginalArtistDto
 
   @ApiProperty({ type: () => ArtistDto })
   readonly artist: ArtistDto
+
+  @ApiProperty({ type: () => OriginalSongDto })
+  readonly originalSong: OriginalSongDto
 }

@@ -15,7 +15,7 @@ export class ArtistController {
     type: ArtistDto,
   })
   async getPlaylistById(@Param('artistId') artistId: string): Promise<ArtistDto> {
-    return this.artistService.searchArtist(artistId)
+    return this.artistService.findById(artistId)
   }
 
   @Post()

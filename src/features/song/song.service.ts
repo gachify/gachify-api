@@ -16,8 +16,6 @@ import { YoutubeService } from './youtube.service'
 import { MEDIA_PATH } from '../../app.constants'
 
 import { ArtistEntity } from '@features/artist/entities'
-import { AnalyticsService } from '@features/analytics'
-import { UserEntity } from '@features/user/entities'
 import { PageMetaDto } from '@common/dto'
 
 @Injectable()
@@ -29,27 +27,23 @@ export class SongService {
     private readonly artistRepository: Repository<ArtistEntity>,
     private readonly dataSource: DataSource,
     private readonly youtubeService: YoutubeService,
-    private readonly analyticsService: AnalyticsService,
   ) {}
 
-  async updatePlaybackCount(currentUser: UserEntity, songId: string): Promise<void> {
-    const song = await this.songRepository.findOneBy({ uuid: songId })
+  // async updatePlaybackCount(currentUser: UserEntity, songId: string): Promise<void> {
+  //   const song = await this.songRepository.findOneBy({ uuid: songId })
 
-    if (song) {
-      song.playbackCount = song.playbackCount + 1
+  //   if (song) {
+  //     song.playbackCount = song.playbackCount + 1
 
-      await Promise.all([
-        this.songRepository.save(song),
-        this.analyticsService.updateUserAnalytics(currentUser.uuid, song),
-      ])
-    }
-  }
+  //     await Promise.all([this.songRepository.save(song)])
+  //   }
+  // }
 
   async createSong(createSongDto: CreateSongDto): Promise<SongEntity> {
     const videoCode = this.youtubeService.getVideoCode(createSongDto.youtubeUrl)
     const video = await this.youtubeService.getInfo(videoCode)
 
-    const songExists = await this.songRepository.findOneBy({ name: video.title })
+    const songExists = await this.songRepository.findOneBy({ title: video.title })
 
     if (songExists) {
       throw new BadRequestException()
@@ -61,7 +55,7 @@ export class SongService {
     await queryRunner.startTransaction()
 
     try {
-      const song = this.songRepository.create({ name: video.title, duration: video.duration })
+      const song = this.songRepository.create({ title: video.title, duration: video.duration })
 
       const artistName = video.channel
 
@@ -77,7 +71,7 @@ export class SongService {
 
       await queryRunner.manager.save(song)
 
-      await this.youtubeService.download(videoCode, song.uuid)
+      await this.youtubeService.download(videoCode, song.id)
 
       await queryRunner.commitTransaction()
 
@@ -92,7 +86,7 @@ export class SongService {
   }
 
   async searchSong(songId: string): Promise<SongEntity> {
-    const song = await this.songRepository.findOne({ relations: ['artist'], where: { uuid: songId } })
+    const song = await this.songRepository.findOne({ relations: ['artist'], where: { id: songId } })
 
     if (!song) {
       throw new NotFoundException()
@@ -105,7 +99,7 @@ export class SongService {
     return this.songRepository.find({
       relations: ['artist'],
       take: 12,
-      order: { playbackCount: 'DESC', createdAt: 'DESC' },
+      // order: { playbackCount: 'DESC', createdAt: 'DESC' },
     })
   }
 

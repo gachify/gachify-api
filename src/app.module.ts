@@ -8,15 +8,12 @@ import { UserModule } from '@features/user'
 import { PlaylistModule } from '@features/playlist'
 import { SongModule } from '@features/song'
 import { ArtistModule } from '@features/artist'
-import { AnalyticsModule } from '@features/analytics'
-import { SnakeNamingStrategy } from '@common/strategies'
 import { MediaModule } from '@features/media'
 
 @Module({
   imports: [
     AuthModule,
     ArtistModule,
-    AnalyticsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: environment.POSTGRES_HOST,
@@ -25,10 +22,9 @@ import { MediaModule } from '@features/media'
       password: environment.POSTGRES_PASSWORD,
       database: environment.POSTGRES_DB,
       autoLoadEntities: true,
-      namingStrategy: new SnakeNamingStrategy(),
       // synchronize: environment.NODE_ENV === NODE_ENV.DEVELOPMENT,
-      synchronize: true,
-      // migrationsRun: true,
+      // synchronize: true,
+      migrationsRun: true,
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       logging: environment.NODE_ENV === NODE_ENV.DEVELOPMENT,
     }),
