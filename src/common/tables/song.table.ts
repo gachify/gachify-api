@@ -3,6 +3,7 @@ import { Table, TableColumn, TableForeignKey } from 'typeorm'
 import { ArtistTable } from './artist.table'
 import { OriginalSongTable } from './original-song.table'
 import { OriginalArtistTable } from './original-artist.table'
+import { LanguageTable } from './language.table'
 
 import { CharacterTypes, NumericTypes, UUIDGenerator, UUIDType } from '@common/models'
 
@@ -40,7 +41,7 @@ export class SongTable {
     name: 'OriginalArtistId',
     type: UUIDType,
     foreignKeyConstraintName: this.originalArtistIdForeignKey.name,
-    isNullable: false,
+    isNullable: true,
   })
 
   static originalSongIdForeignKey = new TableForeignKey({
@@ -53,6 +54,19 @@ export class SongTable {
     name: 'OriginalSongId',
     type: UUIDType,
     foreignKeyConstraintName: this.originalSongIdForeignKey.name,
+    isNullable: true,
+  })
+
+  static languageIdForeignKey = new TableForeignKey({
+    columnNames: ['LanguageId'],
+    referencedTableName: LanguageTable.table.name,
+    referencedColumnNames: [LanguageTable.idColumn.name],
+  })
+
+  static languageIdColumn = new TableColumn({
+    name: 'LanguageId',
+    type: UUIDType,
+    foreignKeyConstraintName: this.languageIdForeignKey.name,
     isNullable: false,
   })
 
@@ -93,11 +107,17 @@ export class SongTable {
       this.artistIdColumn,
       this.originalArtistIdColumn,
       this.originalSongIdColumn,
+      this.languageIdColumn,
       this.titleColumn,
       this.imageUrlColumn,
       this.durationColumn,
       this.youtubeUrlColumn,
     ],
-    foreignKeys: [this.artistIdForeignKey, this.originalArtistIdForeignKey, this.originalSongIdForeignKey],
+    foreignKeys: [
+      this.artistIdForeignKey,
+      this.originalArtistIdForeignKey,
+      this.originalSongIdForeignKey,
+      this.languageIdForeignKey,
+    ],
   })
 }

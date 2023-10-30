@@ -1,11 +1,11 @@
 import { Table, TableColumn, TableForeignKey } from 'typeorm'
 
 import { SongTable } from './song.table'
-import { TagTable } from './tag.table'
+import { GenreTable } from './genre.table'
 
 import { UUIDType } from '@common/models'
 
-export class SongTagTable {
+export class SongGenreTable {
   static songIdForeignKey = new TableForeignKey({
     columnNames: ['SongId'],
     referencedTableName: SongTable.table.name,
@@ -19,22 +19,22 @@ export class SongTagTable {
     isNullable: false,
   })
 
-  static tagIdForeignKey = new TableForeignKey({
-    columnNames: ['TagId'],
-    referencedTableName: TagTable.table.name,
-    referencedColumnNames: [TagTable.idColumn.name],
+  static genreIdForeignKey = new TableForeignKey({
+    columnNames: ['GenreId'],
+    referencedTableName: GenreTable.table.name,
+    referencedColumnNames: [GenreTable.idColumn.name],
   })
 
-  static tagIdColumn = new TableColumn({
-    name: 'TagId',
+  static genreIdColumn = new TableColumn({
+    name: 'GenreId',
     type: UUIDType,
-    foreignKeyConstraintName: this.tagIdForeignKey.name,
+    foreignKeyConstraintName: this.genreIdForeignKey.name,
     isNullable: false,
   })
 
   static table = new Table({
-    name: 'SongTag',
-    columns: [this.songIdColumn, this.tagIdColumn],
-    foreignKeys: [this.tagIdForeignKey, this.songIdForeignKey],
+    name: 'SongGenre',
+    columns: [this.songIdColumn, this.genreIdColumn],
+    foreignKeys: [this.songIdForeignKey, this.genreIdForeignKey],
   })
 }

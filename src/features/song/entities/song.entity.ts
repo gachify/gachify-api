@@ -1,8 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryColumn } from 'typeorm'
 
-import { OriginalSongEntity } from './original-song.entity'
+import { TagEntity } from './tag.entity'
+import { LanguageEntity } from './language.entity'
+import { GenreEntity } from './genre.entity'
 
-import { ArtistEntity, OriginalArtistEntity } from '@features/artist/entities'
+import { ArtistEntity } from '@features/artist/entities'
 import { SongTable } from '@common/tables'
 import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
 import { PlaylistEntity } from '@features/playlist/entities'
@@ -21,17 +23,30 @@ export class SongEntity {
   @Column(toColumnOptions(SongTable.imageUrlColumn))
   imageUrl: string
 
-  @ManyToOne(() => OriginalArtistEntity)
-  @JoinColumn(SongTable.originalArtistIdColumn)
-  originalArtist: OriginalArtistEntity
+  @Column(toColumnOptions(SongTable.youtubeUrlColumn))
+  youtubeUrl: string
+
+  // @ManyToOne(() => OriginalArtistEntity)
+  // @JoinColumn(SongTable.originalArtistIdColumn)
+  // originalArtist?: OriginalArtistEntity
+
+  // @OneToOne(() => OriginalSongEntity)
+  // @JoinColumn(SongTable.originalSongIdColumn)
+  // originalSong?: OriginalSongEntity
+
+  @ManyToOne(() => LanguageEntity)
+  @JoinColumn(SongTable.languageIdColumn)
+  language: LanguageEntity
+
+  @ManyToMany(() => TagEntity, (tag) => tag.songs)
+  tags: TagEntity[]
+
+  @ManyToMany(() => GenreEntity, (genre) => genre.songs)
+  genres: GenreEntity[]
 
   @ManyToOne(() => ArtistEntity, (artist) => artist.songs)
   @JoinColumn(SongTable.artistIdColumn)
   artist: ArtistEntity
-
-  @OneToOne(() => OriginalSongEntity)
-  @JoinColumn(SongTable.originalSongIdColumn)
-  originalSong: OriginalSongEntity
 
   @ManyToMany(() => PlaylistEntity, (playlist) => playlist.songs)
   playlists: PlaylistEntity[]

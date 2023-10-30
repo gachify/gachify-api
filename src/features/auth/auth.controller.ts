@@ -22,11 +22,11 @@ export class AuthController {
     status: HttpStatus.OK,
     type: UserAccountDto,
   })
-  async register(@Res() res: FastifyReply, @Body() input: RegisterUserDto): Promise<UserAccountDto> {
+  async register(@Res() res: FastifyReply, @Body() input: RegisterUserDto): Promise<void> {
     const userAccount = await this.authService.register(input)
     this.setSessionCookie(res, userAccount)
-    return userAccount
-    // res.send(user)
+
+    res.send(userAccount)
   }
 
   @Post('/login')
@@ -36,11 +36,11 @@ export class AuthController {
     status: HttpStatus.OK,
     type: UserAccountDto,
   })
-  async login(@Res() res: FastifyReply, @Body() input: LoginUserDto): Promise<UserAccountDto> {
+  async login(@Res() res: FastifyReply, @Body() input: LoginUserDto): Promise<void> {
     const userAccount = await this.authService.login(input)
     this.setSessionCookie(res, userAccount)
-    return userAccount
-    // res.send(user)
+
+    res.send(userAccount)
   }
 
   @Get('/whoami')

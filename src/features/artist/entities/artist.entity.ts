@@ -4,7 +4,7 @@ import { ArtistTable } from '@common/tables'
 import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
 import { SongEntity } from '@features/song/entities'
 
-@Entity({ name: ArtistTable.name })
+@Entity({ name: ArtistTable.table.name })
 export class ArtistEntity {
   @PrimaryColumn(toPrimaryColumnOptions(ArtistTable.idColumn))
   id: string

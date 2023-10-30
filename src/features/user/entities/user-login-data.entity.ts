@@ -5,7 +5,7 @@ import { UserAccountEntity } from './user-account.entity'
 import { UserLoginDataTable } from '@common/tables'
 import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
 
-@Entity({ name: UserLoginDataTable.name })
+@Entity({ name: UserLoginDataTable.table.name })
 export class UserLoginDataEntity {
   @PrimaryColumn(toPrimaryColumnOptions(UserLoginDataTable.userIdColumn))
   userId: string

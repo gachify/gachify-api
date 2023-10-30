@@ -36,13 +36,9 @@ export class AuthService {
   }
 
   async register({ username, email, password }: RegisterUserDto): Promise<UserAccountEntity> {
-    try {
-      const userAccount = await this.userAccountService.createUserAccount(username, email, password)
+    const userAccount = await this.userAccountService.createUserAccount(username, email, password)
 
-      return userAccount
-    } catch (error) {
-      throw new UnauthorizedException()
-    }
+    return userAccount
   }
 
   getUserFromToken(token: string): Promise<UserAccountEntity | null> {

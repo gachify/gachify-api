@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm'
 import { UserLoginLogTable } from '@common/tables'
 import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
 
-@Entity({ name: UserLoginLogTable.name })
+@Entity({ name: UserLoginLogTable.table.name })
 export class UserLoginLogEntity {
   @PrimaryColumn(toPrimaryColumnOptions(UserLoginLogTable.userIdColumn))
   userId: string

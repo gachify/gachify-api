@@ -2,7 +2,7 @@ import { Table, TableColumn } from 'typeorm'
 
 import { CharacterTypes, UUIDGenerator, UUIDType } from '@common/models'
 
-export class TagTable {
+export class LanguageTable {
   static idColumn = new TableColumn({
     name: 'Id',
     type: UUIDType,
@@ -21,7 +21,7 @@ export class TagTable {
   })
 
   static table = new Table({
-    name: 'Tag',
+    name: 'Language',
     columns: [this.idColumn, this.nameColumn],
   })
 }

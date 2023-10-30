@@ -6,11 +6,11 @@ import {
   StreamableFile,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DataSource, Repository } from 'typeorm'
+import { DataSource, In, Repository } from 'typeorm'
 import { createReadStream, statSync } from 'fs'
 import { join } from 'path'
 
-import { SongEntity } from './entities'
+import { GenreEntity, LanguageEntity, SongEntity, TagEntity } from './entities'
 import { CreateSongDto, SongsPageDto, SongsPageOptionsDto } from './dto'
 import { YoutubeService } from './youtube.service'
 import { MEDIA_PATH } from '../../app.constants'
@@ -55,14 +55,25 @@ export class SongService {
     await queryRunner.startTransaction()
 
     try {
-      const song = this.songRepository.create({ title: video.title, duration: video.duration })
+      const [language, genres] = await Promise.all([
+        queryRunner.manager.findOneByOrFail(LanguageEntity, { id: createSongDto.languageId }),
+        queryRunner.manager.findBy(GenreEntity, { id: In(createSongDto.genreIds) }),
+        // queryRunner.manager.findBy(TagEntity, { id: In(createSongDto.tagIds) }),
+      ])
 
-      const artistName = video.channel
+      const song = this.songRepository.create({
+        language,
+        genres,
+        // tags,
+        title: video.title,
+        duration: video.duration,
+        youtubeUrl: video.webpage_url,
+      })
 
-      let artist = await queryRunner.manager.findOne(ArtistEntity, { where: { name: artistName } })
+      let artist = await queryRunner.manager.findOne(ArtistEntity, { where: { youtubeUrl: video.channel_url } })
 
       if (!artist) {
-        artist = this.artistRepository.create({ name: artistName })
+        artist = this.artistRepository.create({ name: video.channel, youtubeUrl: video.channel_url })
 
         await queryRunner.manager.save(artist)
       }
@@ -86,7 +97,10 @@ export class SongService {
   }
 
   async searchSong(songId: string): Promise<SongEntity> {
-    const song = await this.songRepository.findOne({ relations: ['artist'], where: { id: songId } })
+    const song = await this.songRepository.findOne({
+      relations: { artist: true, tags: true, language: true, genres: true },
+      where: { id: songId },
+    })
 
     if (!song) {
       throw new NotFoundException()
@@ -97,7 +111,7 @@ export class SongService {
 
   popularSongs(): Promise<SongEntity[]> {
     return this.songRepository.find({
-      relations: ['artist'],
+      relations: { artist: true },
       take: 12,
       // order: { playbackCount: 'DESC', createdAt: 'DESC' },
     })
@@ -105,7 +119,7 @@ export class SongService {
 
   async getSongs(pageOptionsDto: SongsPageOptionsDto): Promise<SongsPageDto> {
     const [songs, songsCount] = await this.songRepository.findAndCount({
-      relations: ['artist'],
+      relations: { artist: true },
       skip: pageOptionsDto.skip,
       take: pageOptionsDto.take,
     })

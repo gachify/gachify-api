@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm'
 
 import { PlaylistSongTable } from '@common/tables'
 
-export class CreatePlaylistSongTable1698519208175 implements MigrationInterface {
+export class CreatePlaylistSongTable1000000000110 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(PlaylistSongTable.table)
   }

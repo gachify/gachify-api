@@ -6,7 +6,7 @@ import { UserAccountTable } from '@common/tables'
 import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
 import { PlaylistEntity } from '@features/playlist/entities'
 
-@Entity({ name: UserAccountTable.name })
+@Entity({ name: UserAccountTable.table.name })
 export class UserAccountEntity {
   @PrimaryColumn(toPrimaryColumnOptions(UserAccountTable.idColumn))
   id: string
