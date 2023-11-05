@@ -47,11 +47,8 @@ export class SongController {
   stream(
     @Param('songId') songId: string,
     @Headers('range') range: string,
-    @CurrentUser() currentUser: UserAccountEntity,
     @Res({ passthrough: true }) response: FastifyReply,
   ): StreamableFile {
-    // this.songService.updatePlaybackCount(currentUser, songId)
-
     if (!range) {
       return this.songService.getAudioStreamById(songId)
     }
@@ -76,10 +73,13 @@ export class SongController {
   @Get('/popular')
   @ApiOkResponse({
     status: HttpStatus.OK,
-    type: [SongDto],
+    type: SongsPageDto,
   })
-  getPopularSongs(): Promise<SongDto[]> {
-    return this.songService.popularSongs()
+  getPopularSongs(
+    @Query(new ValidationPipe({ transform: true }))
+    pageOptionsDto: SongsPageOptionsDto,
+  ): Promise<SongsPageDto> {
+    return this.songService.popularSongs(pageOptionsDto)
   }
 
   @Post()
@@ -87,7 +87,10 @@ export class SongController {
     status: HttpStatus.OK,
     type: SongDto,
   })
-  createPlaylist(@Body() input: CreateSongDto): Promise<SongDto> {
-    return this.songService.createSong(input)
+  createPlaylist(
+    @Body() createSongDto: CreateSongDto,
+    @CurrentUser() userAccount: UserAccountEntity,
+  ): Promise<SongDto> {
+    return this.songService.createSong(userAccount, createSongDto)
   }
 }

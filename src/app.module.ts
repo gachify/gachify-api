@@ -9,6 +9,7 @@ import { PlaylistModule } from '@features/playlist'
 import { SongModule } from '@features/song'
 import { ArtistModule } from '@features/artist'
 import { MediaModule } from '@features/media'
+import { TrackingModule } from '@features/tracking'
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MediaModule } from '@features/media'
     PlaylistModule,
     SongModule,
     MediaModule,
+    TrackingModule,
   ],
   controllers: [],
   providers: [],

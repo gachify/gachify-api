@@ -12,9 +12,6 @@ export class ArtistDto {
   @ApiProperty()
   readonly imageUrl?: string
 
-  @ApiProperty()
-  readonly youtubeUrl?: string
-
   @ApiProperty({ type: () => [SongDto] })
   readonly songs: SongDto[]
 }

@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from 'typeorm'
+import { Exclude } from 'class-transformer'
 
 import { SongEntity } from '@features/song/entities'
 import { PlaylistSongTable, PlaylistTable } from '@common/tables'
@@ -15,6 +16,10 @@ export class PlaylistEntity {
 
   @Column(toColumnOptions(PlaylistTable.imageUrlColumn))
   imageUrl: string
+
+  @Exclude()
+  @Column(toColumnOptions(PlaylistTable.userIdColumn))
+  userId: string
 
   @ManyToOne(() => UserAccountEntity, (user) => user.playlists)
   @JoinColumn(PlaylistTable.userIdColumn)

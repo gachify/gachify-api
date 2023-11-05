@@ -141,6 +141,3 @@ dist
 # Docker volumes
 /data
 /media
-
-# Cerificates
-/ssl

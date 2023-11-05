@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common'
@@ -10,16 +11,19 @@ import { DataSource, In, Repository } from 'typeorm'
 import { createReadStream, statSync } from 'fs'
 import { join } from 'path'
 
-import { GenreEntity, LanguageEntity, SongEntity, TagEntity } from './entities'
+import { SongEntity, SongUploadLogEntity } from './entities'
 import { CreateSongDto, SongsPageDto, SongsPageOptionsDto } from './dto'
 import { YoutubeService } from './youtube.service'
 import { MEDIA_PATH } from '../../app.constants'
 
 import { ArtistEntity } from '@features/artist/entities'
 import { PageMetaDto } from '@common/dto'
+import { UserAccountEntity } from '@features/user/entities'
 
 @Injectable()
 export class SongService {
+  private readonly logger = new Logger(SongService.name)
+
   constructor(
     @InjectRepository(SongEntity)
     private readonly songRepository: Repository<SongEntity>,
@@ -29,19 +33,11 @@ export class SongService {
     private readonly youtubeService: YoutubeService,
   ) {}
 
-  // async updatePlaybackCount(currentUser: UserEntity, songId: string): Promise<void> {
-  //   const song = await this.songRepository.findOneBy({ uuid: songId })
-
-  //   if (song) {
-  //     song.playbackCount = song.playbackCount + 1
-
-  //     await Promise.all([this.songRepository.save(song)])
-  //   }
-  // }
-
-  async createSong(createSongDto: CreateSongDto): Promise<SongEntity> {
+  async createSong(userAccount: UserAccountEntity, createSongDto: CreateSongDto): Promise<SongEntity> {
     const videoCode = this.youtubeService.getVideoCode(createSongDto.youtubeUrl)
     const video = await this.youtubeService.getInfo(videoCode)
+
+    console.log(video.duration)
 
     const songExists = await this.songRepository.findOneBy({ title: video.title })
 
@@ -55,15 +51,15 @@ export class SongService {
     await queryRunner.startTransaction()
 
     try {
-      const [language, genres] = await Promise.all([
-        queryRunner.manager.findOneByOrFail(LanguageEntity, { id: createSongDto.languageId }),
-        queryRunner.manager.findBy(GenreEntity, { id: In(createSongDto.genreIds) }),
-        // queryRunner.manager.findBy(TagEntity, { id: In(createSongDto.tagIds) }),
-      ])
+      // const [language, genres, tags] = await Promise.all([
+      //   queryRunner.manager.findOneByOrFail(LanguageEntity, { id: createSongDto.languageId }),
+      //   queryRunner.manager.findBy(GenreEntity, { id: In(createSongDto.genreIds) }),
+      //   queryRunner.manager.findBy(TagEntity, { id: In(createSongDto.tagIds) }),
+      // ])
 
       const song = this.songRepository.create({
-        language,
-        genres,
+        // language,
+        // genres,
         // tags,
         title: video.title,
         duration: video.duration,
@@ -81,6 +77,9 @@ export class SongService {
       song.artist = artist
 
       await queryRunner.manager.save(song)
+      await queryRunner.manager.save(
+        queryRunner.manager.create(SongUploadLogEntity, { userId: userAccount.id, songId: song.id }),
+      )
 
       await this.youtubeService.download(videoCode, song.id)
 
@@ -89,7 +88,7 @@ export class SongService {
       return song
     } catch (error) {
       await queryRunner.rollbackTransaction()
-
+      this.logger.debug(error)
       throw new InternalServerErrorException()
     } finally {
       await queryRunner.release()
@@ -109,17 +108,43 @@ export class SongService {
     return song
   }
 
-  popularSongs(): Promise<SongEntity[]> {
-    return this.songRepository.find({
+  async popularSongs(pageOptionsDto: SongsPageOptionsDto): Promise<SongsPageDto> {
+    const [songs, songsCount] = await this.songRepository.findAndCount({
       relations: { artist: true },
-      take: 12,
-      // order: { playbackCount: 'DESC', createdAt: 'DESC' },
+      order: { playbackCount: 'desc', title: 'asc' },
+      skip: pageOptionsDto.skip,
+      take: pageOptionsDto.take,
     })
+
+    const pageMetaDto = new PageMetaDto({
+      pageOptionsDto,
+      itemCount: songsCount,
+    })
+
+    return new SongsPageDto(songs, pageMetaDto)
   }
 
   async getSongs(pageOptionsDto: SongsPageOptionsDto): Promise<SongsPageDto> {
     const [songs, songsCount] = await this.songRepository.findAndCount({
       relations: { artist: true },
+      order: { title: 'asc' },
+      skip: pageOptionsDto.skip,
+      take: pageOptionsDto.take,
+    })
+
+    const pageMetaDto = new PageMetaDto({
+      pageOptionsDto,
+      itemCount: songsCount,
+    })
+
+    return new SongsPageDto(songs, pageMetaDto)
+  }
+
+  async getSongsByArtistId(artistId: string, pageOptionsDto: SongsPageOptionsDto): Promise<SongsPageDto> {
+    const [songs, songsCount] = await this.songRepository.findAndCount({
+      where: { artist: { id: artistId } },
+      relations: { artist: true },
+      order: { title: 'asc' },
       skip: pageOptionsDto.skip,
       take: pageOptionsDto.take,
     })

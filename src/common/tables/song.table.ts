@@ -67,7 +67,7 @@ export class SongTable {
     name: 'LanguageId',
     type: UUIDType,
     foreignKeyConstraintName: this.languageIdForeignKey.name,
-    isNullable: false,
+    isNullable: true,
   })
 
   static titleColumn = new TableColumn({
@@ -93,6 +93,13 @@ export class SongTable {
     isNullable: false,
   })
 
+  static playbackCountColumn = new TableColumn({
+    name: 'PlaybackCount',
+    type: NumericTypes.bigint,
+    isNullable: false,
+    default: 0,
+  })
+
   static youtubeUrlColumn = new TableColumn({
     name: 'YoutubeUrl',
     length: '255',
@@ -111,6 +118,7 @@ export class SongTable {
       this.titleColumn,
       this.imageUrlColumn,
       this.durationColumn,
+      this.playbackCountColumn,
       this.youtubeUrlColumn,
     ],
     foreignKeys: [

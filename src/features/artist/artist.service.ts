@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
 import { ArtistEntity } from './entities'
-import { CreateArtistDto } from './dto'
 
 @Injectable()
 export class ArtistService {
@@ -11,12 +10,6 @@ export class ArtistService {
     @InjectRepository(ArtistEntity)
     private readonly artistRepository: Repository<ArtistEntity>,
   ) {}
-
-  async createArtist(artistDto: CreateArtistDto): Promise<ArtistEntity> {
-    const artist = this.artistRepository.create({ name: artistDto.name })
-
-    return this.artistRepository.save(artist)
-  }
 
   async findById(artistId: string): Promise<ArtistEntity> {
     const artist = await this.artistRepository.findOne({ relations: ['songs'], where: { id: artistId } })

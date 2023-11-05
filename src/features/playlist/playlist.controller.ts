@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common'
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, ValidationPipe } from '@nestjs/common'
 import { ApiTags, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger'
 
-import { CreatePlaylistDto, PlaylistDto } from './dto'
+import { CreatePlaylistDto, PlaylistDto, PlaylistPageDto, PlaylistPageOptionsDto } from './dto'
 import { PlaylistService } from './playlist.service'
 
 import { CurrentUser } from '@features/auth/decorators'
@@ -15,10 +15,14 @@ export class PlaylistController {
   @Get('/my')
   @ApiOkResponse({
     status: HttpStatus.OK,
-    type: [PlaylistDto],
+    type: PlaylistPageDto,
   })
-  async userPlaylists(@CurrentUser() user: UserAccountEntity): Promise<PlaylistDto[]> {
-    return this.playlistService.getPlaylists(user)
+  userPlaylists(
+    @Query(new ValidationPipe({ transform: true }))
+    pageOptionsDto: PlaylistPageOptionsDto,
+    @CurrentUser() user: UserAccountEntity,
+  ): Promise<PlaylistPageDto> {
+    return this.playlistService.getPlaylists(user, { page: 1, take: 50, skip: 0 })
   }
 
   @Get('/:playlistId')
@@ -26,7 +30,7 @@ export class PlaylistController {
     status: HttpStatus.OK,
     type: PlaylistDto,
   })
-  async getPlaylistById(@Param('playlistId') playlistId: string): Promise<PlaylistDto> {
+  getPlaylistById(@Param('playlistId') playlistId: string): Promise<PlaylistDto> {
     return this.playlistService.searchPlaylist(playlistId)
   }
 
@@ -35,7 +39,7 @@ export class PlaylistController {
     status: HttpStatus.OK,
     type: PlaylistDto,
   })
-  async createPlaylist(@Body() input: CreatePlaylistDto): Promise<PlaylistDto> {
-    return this.playlistService.createPlaylist(input)
+  createPlaylist(@CurrentUser() user: UserAccountEntity, @Body() input: CreatePlaylistDto): Promise<PlaylistDto> {
+    return this.playlistService.createPlaylist(user, input)
   }
 }

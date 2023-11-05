@@ -19,7 +19,6 @@ export class PlaylistTable {
     length: '255',
     type: CharacterTypes.varchar,
     isNullable: false,
-    isUnique: true,
   })
 
   // @todo Check if needs separate table
@@ -42,7 +41,6 @@ export class PlaylistTable {
     foreignKeyConstraintName: this.userIdForeignKey.name,
     isPrimary: true,
     isNullable: false,
-    isUnique: true,
   })
 
   static table = new Table({

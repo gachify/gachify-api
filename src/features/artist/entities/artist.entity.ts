@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm'
+import { Exclude } from 'class-transformer'
 
 import { ArtistTable } from '@common/tables'
 import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
@@ -15,6 +16,7 @@ export class ArtistEntity {
   @Column(toColumnOptions(ArtistTable.imageUrlColumn))
   imageUrl?: string
 
+  @Exclude()
   @Column(toColumnOptions(ArtistTable.youtubeUrlColumn))
   youtubeUrl?: string
 

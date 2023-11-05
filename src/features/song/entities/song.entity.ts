@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryColumn } from 'typeorm'
+import { Exclude } from 'class-transformer'
 
 import { TagEntity } from './tag.entity'
 import { LanguageEntity } from './language.entity'
@@ -8,6 +9,7 @@ import { ArtistEntity } from '@features/artist/entities'
 import { SongTable } from '@common/tables'
 import { toColumnOptions, toPrimaryColumnOptions } from '@common/utils'
 import { PlaylistEntity } from '@features/playlist/entities'
+import { PlaybackEventEntity } from '@features/tracking/entities'
 
 @Entity({ name: SongTable.table.name })
 export class SongEntity {
@@ -17,12 +19,17 @@ export class SongEntity {
   @Column(toColumnOptions(SongTable.durationColumn))
   duration: number
 
+  @Exclude()
+  @Column(toColumnOptions(SongTable.playbackCountColumn))
+  playbackCount: number
+
   @Column(toColumnOptions(SongTable.titleColumn))
   title: string
 
   @Column(toColumnOptions(SongTable.imageUrlColumn))
   imageUrl: string
 
+  @Exclude()
   @Column(toColumnOptions(SongTable.youtubeUrlColumn))
   youtubeUrl: string
 
@@ -36,7 +43,7 @@ export class SongEntity {
 
   @ManyToOne(() => LanguageEntity)
   @JoinColumn(SongTable.languageIdColumn)
-  language: LanguageEntity
+  language?: LanguageEntity
 
   @ManyToMany(() => TagEntity, (tag) => tag.songs)
   tags: TagEntity[]
@@ -50,4 +57,7 @@ export class SongEntity {
 
   @ManyToMany(() => PlaylistEntity, (playlist) => playlist.songs)
   playlists: PlaylistEntity[]
+
+  @ManyToMany(() => PlaybackEventEntity, (playback) => playback.songs)
+  playbacks: PlaybackEventEntity[]
 }

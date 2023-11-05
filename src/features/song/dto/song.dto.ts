@@ -30,7 +30,7 @@ export class SongDto {
   readonly artist: ArtistDto
 
   @ApiProperty({ type: () => LanguageDto })
-  readonly language: LanguageDto
+  readonly language?: LanguageDto
 
   @ApiProperty({ type: () => [TagDto] })
   readonly tags: TagDto[]

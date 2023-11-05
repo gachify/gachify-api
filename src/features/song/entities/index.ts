@@ -1,5 +1,6 @@
 export * from './genre.entity'
 export * from './language.entity'
 export * from './original-song.entity'
+export * from './song-upload-log.entity'
 export * from './song.entity'
 export * from './tag.entity'
